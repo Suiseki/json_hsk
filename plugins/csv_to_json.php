@@ -9,23 +9,23 @@
 
 
 /**
- * transfer_scv_to_array
+ * convert_scv_to_array
  *
  * function gets csv file contents and puts each row into array
- * all rows are part of agregation array.
- * Depending on secodn argument you get all rows or certain amount of rows
+ * all converted rows are part of agregation array.
+ * Depending on second argument you get all rows or certain number of rows
  *
  * @param (string) ($_file_handler) csv file contents
- * @param (boolean) ($items_no) rows to parse, if parameten not provided, 
+ * @param (boolean) ($rows_to_convert) rows to parse, if parameter not provided, 
  ** all rows would be iterated
  * @return (array) 
  */
-function transfer_scv_to_array ($_file_handler, $items_no = false) {
+function convert_scv_to_array ($_file_handler, $rows_to_convert = false) {
 
 	$_agregate_array = array();
 	$prop_names = array ('item_id', 'hsk', 'characters', 'pron', 'translation');
-	if (!$items_no) {
-		//dopisać przypadek, gdy nie podano liczby wierszy
+	if (!$rows_to_convert) {
+
 		$i = 0;
 		while(!feof($_file_handler)){
 			$j = 0;
@@ -35,12 +35,11 @@ function transfer_scv_to_array ($_file_handler, $items_no = false) {
 				$j++;
 		}
 		$i++;
-		//echo ('i='.$i.' '.'j='.$j.'<br>');
-			// array_push($_agregate_array, $single_data_item);
+
 		}
 	} else {
-		//if items number is stet function iterates given amount of times
-		for($i=0; $i<=$items_no; $i++) {
+		//if items number is set, function iterates given number of times
+		for($i=0; $i<=$rows_to_convert; $i++) {
 			$single_data_item = fgetcsv($_file_handler, '', ',');
 			$j = 0;
 			foreach ($prop_names as $pr_val) {
@@ -56,11 +55,13 @@ function transfer_scv_to_array ($_file_handler, $items_no = false) {
 }
 
 $file_handler = fopen('../files/hsk4.csv', 'r');
-$agregate_array = transfer_scv_to_array($file_handler, false);
+$agregate_array = convert_scv_to_array($file_handler, false);
 fclose($file_handler);
 
 $manage = json_encode($agregate_array, JSON_UNESCAPED_UNICODE);
 
-echo $manage;
+$fp = fopen('../data/hsk'.date('Ymd').'.json', 'wb');
+fwrite($fp, "\xEF\xBB\xBF".$manage);
+fclose($fp);
 
 ?>
